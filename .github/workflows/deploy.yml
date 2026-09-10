@@ -1,0 +1,29 @@
+name: Deploy para S3
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy do site
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Baixar código do GitHub
+        uses: actions/checkout@v4
+
+      - name: Configurar AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Enviar arquivos para o S3
+        run: |
+          aws s3 sync . s3://${{ secrets.S3_BUCKET }} --delete \
+            --exclude ".git/*" \
+            --exclude ".github/*"
